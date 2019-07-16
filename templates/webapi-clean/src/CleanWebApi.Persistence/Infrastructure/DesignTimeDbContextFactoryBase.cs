@@ -14,7 +14,7 @@ namespace CleanWebApi.Persistence.Infrastructure
 
         public TContext CreateDbContext(string[] args)
         {
-            var basePath = Directory.GetCurrentDirectory() + string.Format("{0}..{0}QDAPI.WebApi", Path.DirectorySeparatorChar);
+            var basePath = Directory.GetCurrentDirectory() + string.Format("{0}..{0}CleanWebApi.WebApi", Path.DirectorySeparatorChar);
             return Create(basePath, Environment.GetEnvironmentVariable(AspNetCoreEnvironment));
         }
 
