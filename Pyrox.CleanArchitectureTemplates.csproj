@@ -1,0 +1,23 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <PackageType>Template</PackageType>
+    <PackageVersion>1.0</PackageVersion>
+    <PackageId>Pyrox.CleanArchitectureTemplates</PackageId>
+    <Title>Clean Architecture Templates</Title>
+    <Authors>Haryz Izzudin</Authors>
+    <Description>Templates to use when creating an ASP.NET Core application with clean architecture.</Description>
+    <PackageTags>dotnet-new;templates;clean-architecture;webapi</PackageTags>
+    <TargetFramework>netcoreapp2.2</TargetFramework>
+
+    <IncludeContentInPack>true</IncludeContentInPack>
+    <IncludeBuildOutput>false</IncludeBuildOutput>
+    <ContentTargetFolders>content</ContentTargetFolders>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Content Include="templates\**\*" Exclude="templates\**\bin\**;templates\**\obj\**" />
+    <Compile Remove="**\*" />
+  </ItemGroup>
+
+</Project>
