@@ -3,6 +3,8 @@ using System.Net;
 using CleanWebApi.WebApi.ViewModels;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Filters;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
 
 namespace CleanWebApi.WebApi.Filters
 {
@@ -20,6 +22,13 @@ namespace CleanWebApi.WebApi.Filters
             //         code = HttpStatusCode.NotFound;
             //         break;
             // }
+
+            // Log exception if it is a non-custom, unhandled exception
+            if (code == HttpStatusCode.InternalServerError)
+            {
+                var logger = context.HttpContext.RequestServices.GetRequiredService<ILogger<CustomExceptionFilterAttribute>>();
+                logger.LogError(context.Exception, "Internal server error occurred");
+            }
 
             context.HttpContext.Response.ContentType = "application/json";
             context.HttpContext.Response.StatusCode = (int)code;
