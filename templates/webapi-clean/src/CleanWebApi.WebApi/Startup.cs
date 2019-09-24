@@ -65,7 +65,7 @@ namespace CleanWebApi.WebApi
                 c.SwaggerDoc("v1", new Info
                 {
                     Version = "v1",
-                    Title = "Clean Web API",
+                    Title = "CleanWebAPI",
                     Description = "ASP.NET Core Web API designed with clean architecture"
                 });
 
