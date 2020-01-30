@@ -1,11 +1,17 @@
-﻿using System;
+using System;
 using System.IO;
 using System.Linq;
 using System.Reflection;
-using System.Text;
+using System.Text.Json;
+using CleanWebApi.Application.Infrastructure;
+using CleanWebApi.Application.Interfaces;
+using CleanWebApi.Application.Samples.Commands.CreateMessage;
+using CleanWebApi.Infrastructure;
+using CleanWebApi.Persistence;
+using CleanWebApi.WebApi.Filters;
+using CleanWebApi.WebApi.Transformers;
 using FluentValidation.AspNetCore;
 using MediatR;
-using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Diagnostics.HealthChecks;
 using Microsoft.AspNetCore.Hosting;
@@ -15,20 +21,10 @@ using Microsoft.AspNetCore.Mvc.ApplicationModels;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.IdentityModel.Tokens;
+using Microsoft.Extensions.Hosting;
+using Microsoft.OpenApi.Models;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
-using Newtonsoft.Json.Serialization;
-using CleanWebApi.Application.Infrastructure;
-using CleanWebApi.Application.Interfaces;
-using CleanWebApi.Application.Samples.Commands.CreateMessage;
-using CleanWebApi.Infrastructure;
-using CleanWebApi.Persistence;
-using CleanWebApi.WebApi.Configuration;
-using CleanWebApi.WebApi.Filters;
-using CleanWebApi.WebApi.Transformers;
-using Swashbuckle.AspNetCore.Swagger;
-using System.Threading.Tasks;
 
 namespace CleanWebApi.WebApi
 {
@@ -44,6 +40,8 @@ namespace CleanWebApi.WebApi
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
+            services.AddControllers();
+
             // EF Core
             ConfigureDatabaseServices(services);
 
@@ -62,7 +60,7 @@ namespace CleanWebApi.WebApi
             // Swagger
             services.AddSwaggerGen(c =>
             {
-                c.SwaggerDoc("v1", new Info
+                c.SwaggerDoc("v1", new OpenApiInfo
                 {
                     Version = "v1",
                     Title = "CleanWebAPI",
@@ -82,66 +80,23 @@ namespace CleanWebApi.WebApi
             // Other services
             services.AddScoped<IDateTimeOffset, MachineDateTimeOffset>();
 
-            // Authentication
-            var appSettingsSection = Configuration.GetSection("AppSettings");
-            services.Configure<AppSettings>(appSettingsSection);
-            var appSettings = appSettingsSection.Get<AppSettings>();
-            var key = Encoding.ASCII.GetBytes(appSettings.Secret);
-            services.AddAuthentication(x =>
-            {
-                x.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
-                x.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
-            })
-            .AddJwtBearer(x =>
-            {
-                x.Events = new JwtBearerEvents
-                {
-                    OnTokenValidated = context => // Make this async if validation involves async operations.
-                    {
-                        var mediator = context.HttpContext.RequestServices.GetRequiredService<IMediator>();
-                        var id = Guid.Parse(context.Principal.Identity.Name);
-                        try
-                        {
-                            // Perform user validation logic here.
-                        }
-                        catch (Exception)
-                        {
-                            context.Fail("Unauthorized");
-                        }
-
-                        return Task.CompletedTask; // Remove this if method is async.
-                    }
-                };
-                x.RequireHttpsMetadata = false;
-                x.SaveToken = true;
-                x.TokenValidationParameters = new TokenValidationParameters
-                {
-                    ValidateIssuerSigningKey = true,
-                    IssuerSigningKey = new SymmetricSecurityKey(key),
-                    ValidateIssuer = false,
-                    ValidateAudience = false,
-                    ValidateLifetime = false
-                };
-            });
-
             services.AddMvc(options =>
             {
                 options.Filters.Add<CustomExceptionFilterAttribute>();
                 options.Conventions.Add(new RouteTokenTransformerConvention(new SlugifyParameterTransformer()));
             })
-                .SetCompatibilityVersion(CompatibilityVersion.Version_2_2)
                 .AddFluentValidation(fv =>
                 {
                     fv.RegisterValidatorsFromAssemblyContaining<CreateMessageCommandValidator>();
                 })
                 .AddJsonOptions(options =>
                 {
-                    options.SerializerSettings.ContractResolver = new CamelCasePropertyNamesContractResolver();
+                    options.JsonSerializerOptions.PropertyNamingPolicy = JsonNamingPolicy.CamelCase;
                 });
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
-        public virtual void Configure(IApplicationBuilder app, IHostingEnvironment env)
+        public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
         {
             app.UseHealthChecks("/api/health", new HealthCheckOptions()
             {
@@ -172,19 +127,22 @@ namespace CleanWebApi.WebApi
             {
                 app.UseDeveloperExceptionPage();
             }
-            else
-            {
-                // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
-                app.UseHsts();
-            }
 
-            app.UseAuthentication();
             app.UseCors(x => x
                 .AllowAnyOrigin()
                 .AllowAnyMethod()
                 .AllowAnyHeader());
+
             app.UseHttpsRedirection();
-            app.UseMvc();
+
+            app.UseRouting();
+
+            app.UseAuthorization();
+
+            app.UseEndpoints(endpoints =>
+            {
+                endpoints.MapControllers();
+            });
         }
 
         public virtual void ConfigureDatabaseServices(IServiceCollection services)

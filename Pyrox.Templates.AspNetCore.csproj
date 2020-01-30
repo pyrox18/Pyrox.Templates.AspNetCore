@@ -8,7 +8,7 @@
     <Authors>Haryz Izzudin</Authors>
     <Description>Templates to use when creating an ASP.NET Core application.</Description>
     <PackageTags>dotnet-new;templates;clean-architecture;webapi</PackageTags>
-    <TargetFramework>netcoreapp2.2</TargetFramework>
+    <TargetFramework>netcoreapp3.1</TargetFramework>
 
     <IncludeContentInPack>true</IncludeContentInPack>
     <IncludeBuildOutput>false</IncludeBuildOutput>
