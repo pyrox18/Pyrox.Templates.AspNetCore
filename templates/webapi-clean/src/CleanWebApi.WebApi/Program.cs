@@ -1,12 +1,12 @@
-﻿using System;
+using System;
 using System.IO;
-using Microsoft.AspNetCore;
+using CleanWebApi.Application.Interfaces;
+using CleanWebApi.Persistence;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using CleanWebApi.Application.Interfaces;
-using CleanWebApi.Persistence;
+using Microsoft.Extensions.Hosting;
 using Serilog;
 
 namespace CleanWebApi.WebApi
@@ -29,13 +29,13 @@ namespace CleanWebApi.WebApi
             try
             {
                 Log.Information("Creating web host...");
-                var host = CreateWebHostBuilder(args).Build();
+                var host = CreateHostBuilder(args).Build();
 
                 using (var scope = host.Services.CreateScope())
                 {
                     try
                     {
-                        var env = scope.ServiceProvider.GetService<IHostingEnvironment>();
+                        var env = scope.ServiceProvider.GetService<IWebHostEnvironment>();
                         var context = scope.ServiceProvider.GetService<ICleanWebApiDbContext>();
                         var concreteContext = context as CleanWebApiDbContext;
 
@@ -62,10 +62,13 @@ namespace CleanWebApi.WebApi
             }
         }
 
-        public static IWebHostBuilder CreateWebHostBuilder(string[] args) =>
-            WebHost.CreateDefaultBuilder(args)
-                .UseStartup<Startup>()
-                .UseConfiguration(Configuration)
-                .UseSerilog();
+        public static IHostBuilder CreateHostBuilder(string[] args) =>
+            Host.CreateDefaultBuilder(args)
+                .ConfigureWebHostDefaults(webBuilder =>
+                {
+                    webBuilder.UseStartup<Startup>()
+                        .UseConfiguration(Configuration)
+                        .UseSerilog();
+                });
     }
 }
