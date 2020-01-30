@@ -1,0 +1,17 @@
+language: csharp
+mono: none
+os: linux
+dist: xenial
+dotnet: 3.1.101
+
+stages:
+  - name: deploy
+    if: tag IS present AND tag =~ ^(\d+\.)?(\d+\.)?(\*|\d+)$
+
+jobs:
+  include:
+    - stage: deploy
+      name: "Publish to NuGet"
+      script:
+        - dotnet pack Pyrox.Templates.AspNetCore.csproj -c Release
+        - dotnet nuget push bin/Release/Pyrox.Templates.AspNetCore.*.nupkg --api-key $NUGET_API_KEY
