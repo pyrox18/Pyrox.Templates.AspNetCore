@@ -1,5 +1,6 @@
 using System;
 using System.IO;
+using System.Linq;
 using CleanWebApi.Persistence;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.EntityFrameworkCore;
@@ -27,29 +28,42 @@ namespace CleanWebApi.WebApi
 
             try
             {
+                var seed = args.Contains("--seed");
+                if (seed)
+                {
+                    args = args.Except(new[] { "--seed" }).ToArray();
+                }
+
                 Log.Information("Creating web host...");
                 var host = CreateHostBuilder(args).Build();
 
-                using (var scope = host.Services.CreateScope())
+                if (seed)
                 {
-                    try
+                    using (var scope = host.Services.CreateScope())
                     {
-                        var env = scope.ServiceProvider.GetService<IWebHostEnvironment>();
-                        var context = scope.ServiceProvider.GetService<CleanWebApiDbContext>();
+                        try
+                        {
+                            var env = scope.ServiceProvider.GetService<IWebHostEnvironment>();
+                            var context = scope.ServiceProvider.GetService<CleanWebApiDbContext>();
 
-                        Log.Information("Migrating database schema...");
-                        context.Database.Migrate();
+                            Log.Information("Migrating database schema...");
+                            context.Database.Migrate();
 
-                        Log.Information("Seeding data...");
-                        CleanWebApiInitializer.Initialize(context);
+                            Log.Information("Seeding data...");
+                            CleanWebApiInitializer.Initialize(context);
+                        }
+                        catch (Exception ex)
+                        {
+                            Log.Error("An error occured while migrating or initializing the database.", ex);
+                            return 1;
+                        }
                     }
-                    catch (Exception ex)
-                    {
-                        Log.Error("An error occured while migrating or initializing the database.", ex);
-                        return 1;
-                    }
+
+                    Log.Information("Done seeding database.");
+                    return 0;
                 }
 
+                Log.Information("Starting host...");
                 host.Run();
                 return 0;
             }
