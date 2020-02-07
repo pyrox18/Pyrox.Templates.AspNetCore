@@ -2,7 +2,7 @@
 
   <PropertyGroup>
     <PackageType>Template</PackageType>
-    <PackageVersion>2.0.0</PackageVersion>
+    <PackageVersion>3.0.0</PackageVersion>
     <PackageId>Pyrox.Templates.AspNetCore</PackageId>
     <Title>Pyrox's ASP.NET Core Templates</Title>
     <Authors>Haryz Izzudin</Authors>
