@@ -1,3 +1,6 @@
+using CleanWebApi.Domain.Entities;
+using System;
+
 namespace CleanWebApi.Persistence
 {
     public class CleanWebApiInitializer
@@ -9,6 +12,11 @@ namespace CleanWebApi.Persistence
 
         public void SeedAllData()
         {
+            var message = new Message("Sample message", DateTimeOffset.Now);
+
+            _context.Messages.Add(message);
+
+            _context.SaveChanges();
         }
 
         public static void Initialize(CleanWebApiDbContext context)

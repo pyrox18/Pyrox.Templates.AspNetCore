@@ -2,28 +2,36 @@ using System.Threading;
 using System.Threading.Tasks;
 using CleanWebApi.Application.Interfaces;
 using CleanWebApi.Application.Samples.Models;
+using CleanWebApi.Domain.Entities;
 using MediatR;
 
 namespace CleanWebApi.Application.Samples.Commands.CreateMessage
 {
-    public class CreateMessageCommandHandler : IRequestHandler<CreateMessageCommand, SampleViewModel>
+    public class CreateMessageCommandHandler : IRequestHandler<CreateMessageCommand, MessageViewModel>
     {
         private readonly IDateTimeOffset _dateTimeOffset;
+        private readonly IMessageRepository _messageRepository;
 
-        public CreateMessageCommandHandler(IDateTimeOffset dateTimeOffset)
+        public CreateMessageCommandHandler(IDateTimeOffset dateTimeOffset, IMessageRepository messageRepository)
         {
             _dateTimeOffset = dateTimeOffset;
+            _messageRepository = messageRepository;
         }
 
-        public Task<SampleViewModel> Handle(CreateMessageCommand request, CancellationToken cancellationToken = default)
+        public async Task<MessageViewModel> Handle(CreateMessageCommand request, CancellationToken cancellationToken = default)
         {
-            var viewModel = new SampleViewModel
+            var message = new Message(request.Message, _dateTimeOffset.Now);
+
+            var messageResult = await _messageRepository.AddAsync(message);
+
+            var viewModel = new MessageViewModel
             {
-                Message = request.Message,
-                Timestamp = _dateTimeOffset.Now
+                Id = messageResult.Id,
+                Content = messageResult.Content,
+                Timestamp = messageResult.Timestamp
             };
 
-            return Task.FromResult(viewModel);
+            return viewModel;
         }
     }
 }
