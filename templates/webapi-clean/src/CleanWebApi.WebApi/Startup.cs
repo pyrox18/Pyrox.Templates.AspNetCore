@@ -8,6 +8,7 @@ using CleanWebApi.Application.Interfaces;
 using CleanWebApi.Application.Samples.Commands.CreateMessage;
 using CleanWebApi.Infrastructure;
 using CleanWebApi.Persistence;
+using CleanWebApi.Persistence.Repositories;
 using CleanWebApi.WebApi.Filters;
 using CleanWebApi.WebApi.Transformers;
 using FluentValidation.AspNetCore;
@@ -43,7 +44,10 @@ namespace CleanWebApi.WebApi
             services.AddControllers();
 
             // EF Core
-            ConfigureDatabaseServices(services);
+            services.AddDbContextPool<CleanWebApiDbContext>(options =>
+            {
+                options.UseNpgsql(Configuration.GetConnectionString("CleanWebApi"));
+            });
 
             services.AddRouting(options => options.LowercaseUrls = true);
 
@@ -73,6 +77,9 @@ namespace CleanWebApi.WebApi
 
                 c.IncludeXmlComments(xmlPath);
             });
+
+            // Repositories
+            services.AddScoped<IMessageRepository, MessageRepository>();
 
             // MediatR
             services.AddMediatR(typeof(RequestLogger<>).Assembly);
@@ -142,13 +149,6 @@ namespace CleanWebApi.WebApi
             app.UseEndpoints(endpoints =>
             {
                 endpoints.MapControllers();
-            });
-        }
-
-        public virtual void ConfigureDatabaseServices(IServiceCollection services)
-        {
-            services.AddDbContextPool<ICleanWebApiDbContext, CleanWebApiDbContext>(options => {
-                options.UseNpgsql(Configuration.GetConnectionString("CleanWebApi"));
             });
         }
     }

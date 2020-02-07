@@ -1,10 +1,12 @@
-using CleanWebApi.Application.Interfaces;
+using CleanWebApi.Domain.Entities;
 using Microsoft.EntityFrameworkCore;
 
 namespace CleanWebApi.Persistence
 {
-    public class CleanWebApiDbContext : DbContext, ICleanWebApiDbContext
+    public class CleanWebApiDbContext : DbContext
     {
+        public DbSet<Message> Messages { get; set; }
+
         public CleanWebApiDbContext(DbContextOptions<CleanWebApiDbContext> options) :
             base(options)
         {

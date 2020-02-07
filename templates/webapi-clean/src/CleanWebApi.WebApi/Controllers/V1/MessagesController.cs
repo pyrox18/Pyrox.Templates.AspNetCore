@@ -1,3 +1,4 @@
+using System;
 using System.Threading.Tasks;
 using CleanWebApi.Application.Samples.Commands.CreateMessage;
 using CleanWebApi.Application.Samples.Models;
@@ -8,18 +9,18 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace CleanWebApi.WebApi.Controllers.V1
 {
-    public class SamplesController : BaseV1Controller
+    public class MessagesController : BaseV1Controller
     {
         /// <summary>
-        /// Retrieves a message.
+        /// Retrieves a message with the given ID.
         /// </summary>
         /// <response code="200">Returns a message.</response>
-        [HttpGet("message")]
+        [HttpGet("messages/{id}")]
         [AllowAnonymous]
-        [ProducesResponseType(typeof(SampleViewModel), 200)]
-        public async Task<ActionResult<SampleViewModel>> GetMessage()
+        [ProducesResponseType(typeof(MessageViewModel), 200)]
+        public async Task<ActionResult<MessageViewModel>> GetMessage(Guid id)
         {
-            var result = await Mediator.Send(new GetMessageQuery());
+            var result = await Mediator.Send(new GetMessageQuery { Id = id });
 
             return Ok(result);
         }
@@ -32,9 +33,9 @@ namespace CleanWebApi.WebApi.Controllers.V1
         /// <response code="400">Indicates a validation error.</response>
         [HttpPost("message")]
         [AllowAnonymous]
-        [ProducesResponseType(typeof(SampleViewModel), 200)]
+        [ProducesResponseType(typeof(MessageViewModel), 200)]
         [ProducesResponseType(typeof(ErrorViewModel), 400)]
-        public async Task<ActionResult<SampleViewModel>> CreateMessage(CreateMessageCommand command)
+        public async Task<ActionResult<MessageViewModel>> CreateMessage(CreateMessageCommand command)
         {
             var result = await Mediator.Send(command);
 

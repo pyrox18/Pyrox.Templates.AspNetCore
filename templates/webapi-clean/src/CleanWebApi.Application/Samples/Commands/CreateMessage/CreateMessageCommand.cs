@@ -3,7 +3,7 @@ using MediatR;
 
 namespace CleanWebApi.Application.Samples.Commands.CreateMessage
 {
-    public class CreateMessageCommand : IRequest<SampleViewModel>
+    public class CreateMessageCommand : IRequest<MessageViewModel>
     {
         public string Message { get; set; }
     }

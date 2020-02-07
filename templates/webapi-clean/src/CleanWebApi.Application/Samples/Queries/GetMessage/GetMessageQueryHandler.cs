@@ -6,24 +6,27 @@ using MediatR;
 
 namespace CleanWebApi.Application.Samples.Queries.GetMessage
 {
-    public class GetMessageQueryHandler : IRequestHandler<GetMessageQuery, SampleViewModel>
+    public class GetMessageQueryHandler : IRequestHandler<GetMessageQuery, MessageViewModel>
     {
-        private readonly IDateTimeOffset _dateTimeOffset;
+        private readonly IMessageRepository _messageRepository;
 
-        public GetMessageQueryHandler(IDateTimeOffset dateTimeOffset)
+        public GetMessageQueryHandler(IMessageRepository messageRepository)
         {
-            _dateTimeOffset = dateTimeOffset;
+            _messageRepository = messageRepository;
         }
 
-        public Task<SampleViewModel> Handle(GetMessageQuery request, CancellationToken cancellationToken = default)
+        public async Task<MessageViewModel> Handle(GetMessageQuery request, CancellationToken cancellationToken = default)
         {
-            var viewModel = new SampleViewModel
+            var message = await _messageRepository.GetByIdAsync(request.Id);
+
+            var viewModel = new MessageViewModel
             {
-                Message = "Sample message",
-                Timestamp = _dateTimeOffset.Now
+                Id = message.Id,
+                Content = message.Content,
+                Timestamp = message.Timestamp
             };
 
-            return Task.FromResult(viewModel);
+            return viewModel;
         }
     }
 }

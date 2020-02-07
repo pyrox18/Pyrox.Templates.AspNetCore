@@ -1,6 +1,5 @@
 using System;
 using System.IO;
-using CleanWebApi.Application.Interfaces;
 using CleanWebApi.Persistence;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.EntityFrameworkCore;
@@ -36,14 +35,13 @@ namespace CleanWebApi.WebApi
                     try
                     {
                         var env = scope.ServiceProvider.GetService<IWebHostEnvironment>();
-                        var context = scope.ServiceProvider.GetService<ICleanWebApiDbContext>();
-                        var concreteContext = context as CleanWebApiDbContext;
+                        var context = scope.ServiceProvider.GetService<CleanWebApiDbContext>();
 
                         Log.Information("Migrating database schema...");
-                        concreteContext.Database.Migrate();
+                        context.Database.Migrate();
 
                         Log.Information("Seeding data...");
-                        CleanWebApiInitializer.Initialize(concreteContext);
+                        CleanWebApiInitializer.Initialize(context);
                     }
                     catch (Exception ex)
                     {

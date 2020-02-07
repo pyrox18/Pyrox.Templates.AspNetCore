@@ -1,10 +1,19 @@
-﻿namespace CleanWebApi.Persistence.Repositories
+﻿using CleanWebApi.Application.Interfaces;
+using CleanWebApi.Domain.Entities;
+using CleanWebApi.Persistence.Specifications;
+using Microsoft.EntityFrameworkCore;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
+
+namespace CleanWebApi.Persistence.Repositories
 {
     public class EfRepository<T> : IAsyncRepository<T> where T : BaseEntity
     {
-        protected readonly RobustaDbContext _context;
+        protected readonly CleanWebApiDbContext _context;
 
-        public EfRepository(RobustaDbContext context)
+        public EfRepository(CleanWebApiDbContext context)
         {
             _context = context;
         }
