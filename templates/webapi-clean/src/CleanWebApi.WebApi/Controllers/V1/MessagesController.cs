@@ -15,7 +15,7 @@ namespace CleanWebApi.WebApi.Controllers.V1
         /// Retrieves a message with the given ID.
         /// </summary>
         /// <response code="200">Returns a message.</response>
-        [HttpGet("messages/{id}")]
+        [HttpGet("{id}")]
         [AllowAnonymous]
         [ProducesResponseType(typeof(MessageViewModel), 200)]
         public async Task<ActionResult<MessageViewModel>> GetMessage(Guid id)
@@ -31,7 +31,7 @@ namespace CleanWebApi.WebApi.Controllers.V1
         /// <param name="command">Message details.</param>
         /// <response code="200">Returns the created message.</response>
         /// <response code="400">Indicates a validation error.</response>
-        [HttpPost("message")]
+        [HttpPost]
         [AllowAnonymous]
         [ProducesResponseType(typeof(MessageViewModel), 200)]
         [ProducesResponseType(typeof(ErrorViewModel), 400)]
