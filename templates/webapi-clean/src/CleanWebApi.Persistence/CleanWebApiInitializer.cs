@@ -16,7 +16,7 @@ namespace CleanWebApi.Persistence
 
             _context.Messages.Add(message);
 
-            _context.SaveChangesAsync();
+            _context.SaveChanges();
         }
 
         public static void Initialize(CleanWebApiDbContext context)
